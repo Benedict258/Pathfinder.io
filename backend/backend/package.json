@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "pathfinder-backend": "file:.."
+  }
+}
