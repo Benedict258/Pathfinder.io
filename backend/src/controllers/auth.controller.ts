@@ -4,8 +4,8 @@ import { supabaseAdmin, hasSupabaseConfig } from "../config/supabase.js";
 
 const signupSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(6),
-  full_name: z.string().min(1).optional(),
+  password: z.string().min(8, "Password must be at least 8 characters").regex(/[A-Z]/, "Password must contain an uppercase letter").regex(/[0-9]/, "Password must contain a number"),
+  full_name: z.string().min(1).max(100).optional(),
 });
 
 export async function signup(req: Request, res: Response) {

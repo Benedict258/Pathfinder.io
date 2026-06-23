@@ -3,7 +3,14 @@ import { env } from "../../config/env.js";
 import { supabaseAdmin } from "../../config/supabase.js";
 import type { OnboardingInput, PathRecommendation } from "../../types/onboarding.js";
 import { recommendPaths } from "../recommendations/recommendation.service.js";
-import { buildUserMessage, buildUserMessageWithRoadmaps, buildFieldStudyMessage, FIELD_STUDY_SYSTEM_PROMPT, SYSTEM_PROMPT, RecommendationResponseSchema } from "./prompt.js";
+import { buildUserMessage, buildUserMessageWithRoadmaps, buildFieldStudyMessage, FIELD_STUDY_SYSTEM_PROMPT, SYSTEM_PROMPT, RESKILLING_SYSTEM_PROMPT, buildReskillingMessage, RecommendationResponseSchema } from "./prompt.js";
+
+function sanitizePromptInput(text: string): string {
+  return text
+    .replace(/[\{\}\[\]\(\)]/g, "")
+    .replace(/system|assistant|function/gi, "")
+    .slice(0, 1000);
+}
 
 export type AiPathDiscoveryResult = {
   recommendations: PathRecommendation[];
@@ -37,11 +44,18 @@ async function callGroq(input: OnboardingInput): Promise<PathRecommendation[]> {
   }
 
   try {
+    const sanitizedInput: OnboardingInput = {
+      background: sanitizePromptInput(input.background),
+      interests: input.interests.map(sanitizePromptInput),
+      goal: input.goal,
+      timeCommitment: input.timeCommitment,
+    };
+
     const completion = await client.chat.completions.create({
       model: env.AI_MODEL,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: buildUserMessageWithRoadmaps(input, await getAvailableRoadmaps()) },
+        { role: "user", content: buildUserMessageWithRoadmaps(sanitizedInput, await getAvailableRoadmaps()) },
       ],
       temperature: 0.7,
       max_tokens: 600,
@@ -119,11 +133,12 @@ export async function runFieldStudyDiscovery(field: string): Promise<AiPathDisco
 
     try {
       const roadmaps = await getAvailableRoadmaps();
+      const sanitizedField = sanitizePromptInput(field);
       const completion = await client.chat.completions.create({
         model: env.AI_MODEL,
         messages: [
           { role: "system", content: FIELD_STUDY_SYSTEM_PROMPT },
-          { role: "user", content: buildFieldStudyMessage(field, roadmaps) },
+          { role: "user", content: buildFieldStudyMessage(sanitizedField, roadmaps) },
         ],
         temperature: 0.7,
         max_tokens: 600,
@@ -142,4 +157,93 @@ export async function runFieldStudyDiscovery(field: string): Promise<AiPathDisco
   }
 
   return runFieldStudyDiscovery(field);
+}
+
+export async function runReskillingDiscovery(input: { currentRole: string; currentSkills: string[]; targetIndustry?: string }): Promise<AiPathDiscoveryResult> {
+  if (env.AI_PROVIDER === "mock") {
+    const roleLower = input.currentRole.toLowerCase();
+    const skillsLower = input.currentSkills.map(s => s.toLowerCase());
+    const industryLower = input.targetIndustry?.toLowerCase() || "";
+
+    const roleSignals: Record<string, string[]> = {
+      nursing: ["data-analysis", "ui-ux-design", "product-management"],
+      teacher: ["product-management", "frontend-development", "ui-ux-design"],
+      accountant: ["data-analysis", "cybersecurity", "cloud-devops"],
+      lawyer: ["cybersecurity", "product-management", "data-analysis"],
+      sales: ["product-management", "data-analysis", "frontend-development"],
+      marketing: ["ui-ux-design", "data-analysis", "product-management"],
+      construction: ["cloud-devops", "frontend-development", "cybersecurity"],
+      driver: ["cloud-devops", "frontend-development", "cybersecurity"],
+      chef: ["product-management", "ui-ux-design", "data-analysis"],
+    };
+
+    const industrySignals: Record<string, string[]> = {
+      fintech: ["cybersecurity", "data-analysis"],
+      health: ["data-analysis", "ai-machine-learning"],
+      education: ["product-management", "frontend-development"],
+      media: ["ui-ux-design", "frontend-development"],
+    };
+
+    const slugs = roleSignals[roleLower] || roleSignals[Object.keys(roleSignals).find(k => roleLower.includes(k)) || ""] || ["frontend-development", "data-analysis", "ui-ux-design"];
+
+    let recommendations = slugs.map((slug, i) => {
+      const title = slug.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+      const confidence = 85 - i * 10;
+      return {
+        slug,
+        title: title === "Ai Machine Learning" ? "AI / Machine Learning" : title === "Cloud DevOps" ? "Cloud / DevOps" : title,
+        confidence,
+        reason: `Your experience as a ${input.currentRole} and skills in ${input.currentSkills.slice(0, 2).join(" and ")} map well to this path.${input.targetIndustry ? ` With your interest in ${input.targetIndustry}, this direction is especially relevant.` : ""}`,
+      };
+    });
+
+    if (industryLower && industrySignals[industryLower]) {
+      const boost = industrySignals[industryLower];
+      recommendations = recommendations.map(r => ({
+        ...r,
+        confidence: Math.min(95, r.confidence + (boost.includes(r.slug) ? 10 : 0)),
+      }));
+      recommendations.sort((a, b) => b.confidence - a.confidence);
+    }
+
+    return { recommendations, engine: "mock" };
+  }
+
+  if (env.AI_PROVIDER === "groq") {
+    const client = getGroqClient();
+    if (!client) {
+      console.warn("[ai-engine] GROQ_API_KEY not set — falling back to mock for reskilling");
+      return runReskillingDiscovery(input);
+    }
+
+    try {
+      const roadmaps = await getAvailableRoadmaps();
+      const sanitizedInput = {
+        currentRole: sanitizePromptInput(input.currentRole),
+        currentSkills: input.currentSkills.map(sanitizePromptInput),
+        targetIndustry: input.targetIndustry ? sanitizePromptInput(input.targetIndustry) : undefined,
+      };
+      const completion = await client.chat.completions.create({
+        model: env.AI_MODEL,
+        messages: [
+          { role: "system", content: RESKILLING_SYSTEM_PROMPT },
+          { role: "user", content: buildReskillingMessage(sanitizedInput, roadmaps) },
+        ],
+        temperature: 0.7,
+        max_tokens: 600,
+      });
+
+      const raw = completion.choices[0]?.message?.content;
+      if (!raw) throw new Error("Empty response from Groq");
+
+      const parsed = JSON.parse(raw.trim());
+      const validated = RecommendationResponseSchema.parse(parsed);
+      return { recommendations: validated.recommendations, engine: "groq" };
+    } catch (error) {
+      console.error("[ai-engine] Reskilling Groq call failed:", error);
+      return runReskillingDiscovery(input);
+    }
+  }
+
+  return runReskillingDiscovery(input);
 }

@@ -1,8 +1,23 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { OnboardingForm } from "@/components/onboarding-form";
-import { OnboardingChat } from "@/components/onboarding-chat";
+
+const OnboardingChat = dynamic(
+  () =>
+    import("@/components/onboarding-chat").then((m) => ({
+      default: m.OnboardingChat,
+    })),
+  {
+    loading: () => (
+      <div className="rounded-lg border border-slate-200 bg-white p-6">
+        <div className="h-64 animate-pulse rounded bg-slate-100" />
+      </div>
+    ),
+    ssr: false,
+  }
+);
 
 export default function OnboardingPage() {
   const [mode, setMode] = useState<"form" | "chat">("chat");

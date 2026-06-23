@@ -14,8 +14,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Pathfinder.io",
-  description: "AI-powered career guidance and focused tech roadmaps",
+  title: {
+    default: "Pathfinder.io — AI Career Guidance for Tech",
+    template: "%s | Pathfinder.io",
+  },
+  description:
+    "Discover your ideal tech career path with AI-powered recommendations, curated roadmaps, and one focused resource per concept.",
 };
 
 export default function RootLayout({

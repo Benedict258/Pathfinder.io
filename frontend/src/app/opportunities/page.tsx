@@ -1,6 +1,12 @@
+import type { Metadata } from "next";
 import { ExternalLink } from "lucide-react";
-import Link from "next/link";
 import { listOpportunities, type Opportunity } from "@/lib/api";
+
+export const metadata: Metadata = {
+  title: "Tech Opportunities",
+  description:
+    "Curated scholarships, internships, events, and jobs for breaking into and growing within tech.",
+};
 
 const typeLabels: Record<string, { label: string; color: string }> = {
   scholarship: { label: "Scholarship", color: "bg-purple-100 text-purple-800" },

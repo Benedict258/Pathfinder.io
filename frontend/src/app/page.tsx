@@ -1,5 +1,12 @@
-import { ArrowRight, Route, Sparkles, Target } from "lucide-react";
+import type { Metadata } from "next";
+import { ArrowRight, Briefcase, Cloud, Route, Sparkles, Target, Wand2 } from "lucide-react";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Pathfinder.io — AI Career Guidance for Tech",
+  description:
+    "Discover your ideal tech career path with AI-powered recommendations, curated roadmaps, and one focused resource per concept.",
+};
 
 export default function Home() {
   return (
@@ -32,7 +39,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="grid gap-4">
+          <div className="grid gap-4 sm:grid-cols-2">
             {[
               {
                 icon: Target,
@@ -46,8 +53,23 @@ export default function Home() {
               },
               {
                 icon: Sparkles,
-                title: "AI-ready engine",
-                text: "Keep AI behind a backend service layer for future LLM integration."
+                title: "AI-powered engine",
+                text: "Powered by Llama 3.3 via Groq for intelligent recommendations."
+              },
+              {
+                icon: Briefcase,
+                title: "Reskilling",
+                text: "Transition into tech from any career with skill-based path matching."
+              },
+              {
+                icon: Cloud,
+                title: "Emerging tech tracks",
+                text: "Explore AI / Machine Learning, Cloud / DevOps, and more."
+              },
+              {
+                icon: Wand2,
+                title: "AI-ready architecture",
+                text: "Mock fallback with Groq integration for fast, scalable pathfinding."
               }
             ].map((item) => (
               <article key={item.title} className="rounded-lg border border-slate-200 bg-slate-50 p-5">

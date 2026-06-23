@@ -105,6 +105,13 @@ export function listOpportunities(type?: string) {
   return request<{ opportunities: Opportunity[] }>(`/opportunities${query}`);
 }
 
+export function recommendReskilling(currentRole: string, currentSkills: string[], targetIndustry?: string) {
+  return request<{ recommendations: PathRecommendation[]; engine: AiEngine }>("/reskilling", {
+    method: "POST",
+    body: JSON.stringify({ currentRole, currentSkills, targetIndustry }),
+  });
+}
+
 export function markNodeComplete(nodeId: string, token: string) {
   return request<{ success: boolean; streak: number }>("/progress/complete", {
     method: "POST",

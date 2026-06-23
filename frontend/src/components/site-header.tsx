@@ -35,6 +35,9 @@ export function SiteHeader() {
           <Link href="/field-study" className="hover:text-slate-950">
             Field Study
           </Link>
+          <Link href="/reskilling" className="hover:text-slate-950">
+            Reskilling
+          </Link>
           <Link href="/opportunities" className="hover:text-slate-950">
             Opportunities
           </Link>

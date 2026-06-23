@@ -195,6 +195,94 @@ const seedRoadmapsData: SeedRoadmap[] = [
     ]
   },
   {
+    slug: "ai-machine-learning",
+    title: "AI / Machine Learning",
+    description: "Learn artificial intelligence, machine learning, and data science fundamentals.",
+    level: "beginner",
+    nodes: [
+      {
+        id: "ai-fundamentals",
+        title: "AI Fundamentals",
+        explanation:
+          "AI is not magic — it's pattern recognition at scale. Learn what machine learning actually does, the difference between supervised and unsupervised learning, and where AI is genuinely useful versus hype.",
+        resourceTitle: "Google AI for Everyone",
+        resourceUrl: "https://ai.google/education/",
+        goDeeper: [
+          { title: "Fast.ai Practical Deep Learning", url: "https://course.fast.ai/" },
+          { title: "3Blue1Brown Neural Networks", url: "https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi" }
+        ]
+      },
+      {
+        id: "python-data-science",
+        title: "Python for Data Science",
+        explanation:
+          "Python is the lingua franca of AI. Learn NumPy for numerical computing, Pandas for data manipulation, and Matplotlib for visualization before touching any ML frameworks.",
+        resourceTitle: "Kaggle Python Course",
+        resourceUrl: "https://www.kaggle.com/learn/python",
+        goDeeper: [
+          { title: "Python Data Science Handbook", url: "https://jakevdp.github.io/PythonDataScienceHandbook/" },
+          { title: "Real Python Tutorials", url: "https://realpython.com/" }
+        ]
+      },
+      {
+        id: "building-first-model",
+        title: "Building Your First Model",
+        explanation:
+          "Move from theory to practice by training a simple model. Use scikit-learn to build a classifier, understand train/test splits, and learn why accuracy isn't everything when evaluating models.",
+        resourceTitle: "Scikit-learn Getting Started",
+        resourceUrl: "https://scikit-learn.org/stable/getting_started.html",
+        goDeeper: [
+          { title: "Kaggle Competitions", url: "https://www.kaggle.com/competitions" },
+          { title: "Made With ML", url: "https://madewithml.com/" }
+        ]
+      }
+    ]
+  },
+  {
+    slug: "cloud-devops",
+    title: "Cloud / DevOps",
+    description: "Deploy, manage, and scale applications in the cloud.",
+    level: "beginner",
+    nodes: [
+      {
+        id: "linux-command-line",
+        title: "Linux & Command Line",
+        explanation:
+          "The cloud runs on Linux. Before touching AWS or Docker, get comfortable with the terminal — navigating files, managing processes, writing shell scripts, and understanding permissions.",
+        resourceTitle: "Linux Journey",
+        resourceUrl: "https://linuxjourney.com/",
+        goDeeper: [
+          { title: "The Missing Semester of CS", url: "https://missing.csail.mit.edu/" },
+          { title: "ExplainShell", url: "https://explainshell.com/" }
+        ]
+      },
+      {
+        id: "cloud-basics-aws",
+        title: "Cloud Basics (AWS)",
+        explanation:
+          "AWS powers a massive portion of the internet. Learn the core services: EC2 (virtual machines), S3 (storage), and IAM (permissions). Understanding these three unlocks everything else.",
+        resourceTitle: "AWS Cloud Practitioner Essentials",
+        resourceUrl: "https://aws.amazon.com/training/digital/aws-cloud-practitioner-essentials/",
+        goDeeper: [
+          { title: "AWS Free Tier hands-on", url: "https://aws.amazon.com/free/" },
+          { title: "ACloudGuru", url: "https://acloudguru.com/" }
+        ]
+      },
+      {
+        id: "containers-ci-cd",
+        title: "Containers & CI/CD",
+        explanation:
+          "Containers package your app with all its dependencies so it runs the same everywhere. CI/CD automates testing and deployment. Together they form the backbone of modern software delivery.",
+        resourceTitle: "Docker Get Started",
+        resourceUrl: "https://docs.docker.com/get-started/",
+        goDeeper: [
+          { title: "GitHub Actions CI/CD", url: "https://docs.github.com/en/actions" },
+          { title: "Kubernetes Basics", url: "https://kubernetes.io/docs/tutorials/kubernetes-basics/" }
+        ]
+      }
+    ]
+  },
+  {
     slug: "product-management",
     title: "Product Management",
     description: "Guide product vision, strategy, and execution from idea to launch.",

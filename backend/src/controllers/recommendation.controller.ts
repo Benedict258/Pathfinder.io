@@ -138,7 +138,7 @@ Return ONLY valid JSON — no markdown, no code fences.`;
       model: env.AI_MODEL,
       messages: [
         { role: "system", content: systemPrompt },
-        ...messages.map((m) => ({ role: m.role as "user" | "assistant", content: m.content })),
+        ...messages.map((m) => ({ role: m.role as "user" | "assistant", content: m.content.slice(0, 2000) })),
       ],
       temperature: 0.7,
       max_tokens: 800,

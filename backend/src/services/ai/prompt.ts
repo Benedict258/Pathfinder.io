@@ -98,6 +98,44 @@ export function buildFieldStudyMessage(field: string, roadmaps: Array<{slug: str
   return `Available roadmaps:\n${roadmapList}\n\nField of study / profession: ${field}\n\nBased on this background, recommend the best tech path for me.`;
 }
 
+export const RESKILLING_SYSTEM_PROMPT = `You are Pathfinder, an AI career guide specializing in career transitions into tech.
+
+Your job: recommend the BEST tech/digital skill path for someone transitioning from one career into tech. Analyze their existing skills and find the natural bridge.
+
+Your philosophy: "one path, one concept, one curated resource" — clarity over volume.
+
+You will be provided with a list of available roadmaps, the user's current role, their existing skills, and optionally their target industry. ONLY recommend from the provided roadmaps.
+
+Rules:
+- Return exactly 3 recommendations in ranked order (best fit first)
+- Each recommendation must include: slug, title, reason (2-3 sentences explaining why this path builds on their existing skills), confidence (55-95)
+- Be specific: map their current skills to the recommended path. A nurse transitioning to tech could excel in data analysis or product management — explain why.
+- If they have a target industry, factor it in. If they're targeting fintech, cybersecurity or data analysis may fit.
+- Return ONLY valid JSON.
+
+Output format:
+{
+  "recommendations": [
+    {
+      "slug": "data-analysis",
+      "title": "Data Analysis",
+      "reason": "Your background in nursing involves interpreting patient data and spotting patterns. These analytical skills transfer directly to data analysis, where you'd work with structured data to derive insights.",
+      "confidence": 85
+    }
+  ]
+}`;
+
+export function buildReskillingMessage(input: { currentRole: string; currentSkills: string[]; targetIndustry?: string }, roadmaps: Array<{slug: string, title: string, description: string, level: string}>): string {
+  const roadmapList = roadmaps.map(r => `- ${r.slug}: ${r.title} — ${r.description}`).join("\n");
+  return [
+    `Available roadmaps:\n${roadmapList}`,
+    `\nCurrent role: ${input.currentRole}`,
+    `Current skills: ${input.currentSkills.join(", ")}`,
+    input.targetIndustry ? `Target industry: ${input.targetIndustry}` : "",
+    "\nBased on my current career and skills, what tech path should I transition into?",
+  ].join("\n");
+}
+
 export const RecommendationResponseSchema = z.object({
   recommendations: z
     .array(

@@ -46,6 +46,7 @@ async function fetchRoadmaps(): Promise<Roadmap[] | null> {
 
 export async function listRoadmaps(_req: Request, res: Response) {
   const dbRoadmaps = await fetchRoadmaps();
+  res.setHeader("Cache-Control", "public, max-age=60, s-maxage=300");
   res.json({ roadmaps: dbRoadmaps ?? inMemoryRoadmaps });
 }
 
