@@ -1,16 +1,24 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { RoadmapList } from "@/components/roadmap-list";
 import { listRoadmaps, type Roadmap } from "@/lib/api";
+import { supabase } from "@/lib/supabase";
 
-export default async function RoadmapsPage() {
-  let roadmaps: Roadmap[] = [];
-  let error = "";
+export default function RoadmapsPage() {
+  const [roadmaps, setRoadmaps] = useState<Roadmap[]>([]);
+  const [error, setError] = useState("");
+  const [token, setToken] = useState<string | null>(null);
 
-  try {
-    const result = await listRoadmaps();
-    roadmaps = result.roadmaps;
-  } catch {
-    error = "Could not load roadmaps. Start the backend server and refresh this page.";
-  }
+  useEffect(() => {
+    listRoadmaps().then(result => setRoadmaps(result.roadmaps)).catch(() => {
+      setError("Could not load roadmaps. Start the backend server and refresh this page.");
+    });
+
+    supabase.auth.getSession().then(({ data }) => {
+      setToken(data.session?.access_token ?? null);
+    });
+  }, []);
 
   return (
     <main className="mx-auto w-full max-w-6xl px-5 py-10">
@@ -29,7 +37,7 @@ export default async function RoadmapsPage() {
           {error}
         </div>
       ) : (
-        <RoadmapList roadmaps={roadmaps} />
+        <RoadmapList roadmaps={roadmaps} token={token} />
       )}
     </main>
   );

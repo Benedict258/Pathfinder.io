@@ -36,6 +36,7 @@ create table if not exists public.roadmap_nodes (
   explanation text not null,
   resource_title text not null,
   resource_url text not null,
+  go_deeper jsonb default '[]',
   position integer not null,
   created_at timestamptz not null default now()
 );

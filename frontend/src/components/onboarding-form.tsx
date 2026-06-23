@@ -134,7 +134,7 @@ export function OnboardingForm() {
         <div className="mt-5 space-y-4">
           {recommendations.length === 0 ? (
             <p className="text-sm leading-6 text-slate-600">
-              Complete the form to test the MVP recommendation engine.
+              Complete the form to get your personalized tech path recommendations.
             </p>
           ) : (
             recommendations.map((item) => (

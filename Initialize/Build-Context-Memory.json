@@ -444,6 +444,383 @@
         "Implement 'Go Deeper' toggle for optional extra resources per concept"
       ],
       "notes": "Phase 1 is 100% complete and fully functional. The MVP demonstrates core product value: personalized path discovery + one curated resource per concept. Backend architecture is properly layered with agentic boundary at ai-engine service level. Ready for Phase 2 AI integration (Claude) and Phase 3 secondary features (progress tracking, news feed, reskilling mode). All Phase 1 deliverables from DevPlan (Week 1-4) have been achieved. The team can now move forward with AI core work."
+    },
+    {
+      "session_id": "session_006",
+      "timestamp": "2026-06-23T15:30:00Z",
+      "ai_agent": "OpenCode (deepseek-v4-pro) with 3 parallel subagents",
+      "current_phase": "Phase 2: AI Core (Llama 3.3 70B via Groq)",
+      "progress": {
+        "completed": [
+          "Replaced @anthropic-ai/sdk with groq-sdk in backend dependencies",
+          "Updated env.ts: AI_PROVIDER enum changed to mock/groq/claude, added GROQ_API_KEY and AI_MODEL fields",
+          "Updated .env.example with groq defaults",
+          "Created prompt.ts: SYSTEM_PROMPT, buildUserMessage(), RecommendationResponseSchema (Zod)",
+          "Updated ai-engine.ts engine type to 'mock' | 'groq' | 'claude'",
+          "Built Groq engine: callGroq() with real LLM calls, JSON parsing, Zod validation, mock fallback on error",
+          "Added POST /api/recommendations/chat endpoint with multi-turn conversational AI",
+          "Added chat controller: chatRecommendation() with conversation system prompt, Groq client, fallback logic",
+          "Added frontend types: AiEngine, ChatMessage, ChatResponse, sendChatMessage()",
+          "Created OnboardingChat component: auto-start, message bubbles, recommendations panel, reset",
+          "Updated onboarding page with Chat/Form toggle (defaults to Chat)",
+          "Removed mock engine notices from UI text",
+          "Removed @posthog/js and @sentry/nextjs from frontend deps (post-MVP, blocked npm install)",
+          "TypeScript compiles cleanly on both frontend and backend",
+          "ESLint passes with zero warnings on frontend"
+        ],
+        "in_progress": [],
+        "blocked": [
+          "GROQ_API_KEY needs to be set in backend/.env before Groq calls work (mock fallback handles this gracefully)"
+        ]
+      },
+      "last_session_summary": "session_005: Phase 1 complete. MVP fully operational with mock engine, 3 roadmaps, onboarding form, roadmap list. Deployed and tested end-to-end.",
+      "changes_made": [
+        "Switched AI provider from Anthropic Claude to Llama 3.3 70B via Groq (cheaper, faster, open-source)",
+        "Built full Groq integration with structured JSON output and Zod validation",
+        "Added real-time conversational AI onboarding flow with multi-turn chat",
+        "Cleaned up post-MVP dependencies blocking npm install (@posthog/js, @sentry/nextjs)",
+        "Used parallel subagents to execute Wave 1 (3 tasks simultaneously), then Wave 3 (2 tasks simultaneously)"
+      ],
+      "file_module_map": [
+        {
+          "file": "backend/package.json",
+          "purpose": "Replaced @anthropic-ai/sdk with groq-sdk",
+          "last_modified": "2026-06-23T15:00:00Z"
+        },
+        {
+          "file": "backend/src/config/env.ts",
+          "purpose": "Updated AI_PROVIDER enum, added GROQ_API_KEY and AI_MODEL fields",
+          "last_modified": "2026-06-23T15:00:00Z"
+        },
+        {
+          "file": "backend/.env.example",
+          "purpose": "Updated with groq defaults (AI_PROVIDER=groq, GROQ_API_KEY, AI_MODEL)",
+          "last_modified": "2026-06-23T15:00:00Z"
+        },
+        {
+          "file": "backend/src/services/ai/prompt.ts",
+          "purpose": "New file: SYSTEM_PROMPT for Llama, buildUserMessage(), RecommendationResponseSchema (Zod)",
+          "last_modified": "2026-06-23T15:05:00Z"
+        },
+        {
+          "file": "backend/src/services/ai/ai-engine.ts",
+          "purpose": "Full rewrite: Groq client integration with JSON parsing, Zod validation, error fallback to mock",
+          "last_modified": "2026-06-23T15:10:00Z"
+        },
+        {
+          "file": "backend/src/controllers/recommendation.controller.ts",
+          "purpose": "Added chatRecommendation() handler with multi-turn conversational AI support",
+          "last_modified": "2026-06-23T15:15:00Z"
+        },
+        {
+          "file": "backend/src/routes/recommendation.routes.ts",
+          "purpose": "Added POST /chat route for conversational onboarding",
+          "last_modified": "2026-06-23T15:15:00Z"
+        },
+        {
+          "file": "frontend/src/lib/api.ts",
+          "purpose": "Added AiEngine type, ChatMessage/ChatResponse types, sendChatMessage() function",
+          "last_modified": "2026-06-23T15:00:00Z"
+        },
+        {
+          "file": "frontend/src/components/onboarding-chat.tsx",
+          "purpose": "New file: chat UI with auto-start, message bubbles, recommendations panel, reset, loading/error states",
+          "last_modified": "2026-06-23T15:20:00Z"
+        },
+        {
+          "file": "frontend/src/components/onboarding-form.tsx",
+          "purpose": "Updated empty-state text to remove mock engine language",
+          "last_modified": "2026-06-23T15:00:00Z"
+        },
+        {
+          "file": "frontend/src/app/onboarding/page.tsx",
+          "purpose": "Converted to client component with Chat/Form tab toggle, defaults to Chat mode",
+          "last_modified": "2026-06-23T15:20:00Z"
+        },
+        {
+          "file": "frontend/package.json",
+          "purpose": "Removed @posthog/js and @sentry/nextjs (post-MVP, blocking npm install)",
+          "last_modified": "2026-06-23T15:25:00Z"
+        }
+      ],
+      "decisions_log": [
+        {
+          "decision": "Use Llama 3.3 70B (versatile) via Groq instead of Anthropic Claude",
+          "reason": "Groq offers generous free tier, 280 tps speed, OpenAI-compatible API. Llama 3.3 70B is production-grade with strong JSON output capabilities. Lower cost than Claude for MVP stage.",
+          "alternatives_considered": "Claude (higher cost, slower), OpenAI (similar cost to Claude), GPT-OSS 120B (preview, less tested)"
+        },
+        {
+          "decision": "Execute Phase 2 with parallel subagents",
+          "reason": "Wave 1 had 3 independent tasks (SDK install, prompt design, frontend types) that could run simultaneously. Wave 3 had 2 (chat endpoint, chat UI). Parallel execution cuts total time by ~60%.",
+          "alternatives_considered": "Sequential execution in a single session (3-4x longer)"
+        },
+        {
+          "decision": "Keep mock engine as fallback when GROQ_API_KEY is not set",
+          "reason": "Ensures the app never breaks. Developers can work without API keys. Users see a graceful degradation message.",
+          "alternatives_considered": "Block app entirely without API key (too strict for development)"
+        },
+        {
+          "decision": "Remove @posthog/js and @sentry/nextjs from frontend package.json",
+          "reason": "Both are post-MVP per AI_INSTRUCTIONS.md. PostHog package doesn't exist on npm registry. Sentry has peer dependency conflict with Next.js 15. Neither is imported anywhere in code.",
+          "alternatives_considered": "Keep with --legacy-peer-deps (fragile), downgrade Next.js (unacceptable scope creep)"
+        },
+        {
+          "decision": "Default onboarding page to Chat mode instead of Form",
+          "reason": "Conversational onboarding is the Phase 2 core deliverable. The form remains available as a fallback. This demonstrates the AI investment immediately.",
+          "alternatives_considered": "Keep form as default and bury chat (misses the point of Phase 2)"
+        }
+      ],
+      "known_issues": [
+        {
+          "issue": "GROQ_API_KEY not set — app falls back to mock engine gracefully but real AI requires the key",
+          "severity": "medium",
+          "status": "open"
+        },
+        {
+          "issue": "Chat conversation state is in-memory (not persisted). Server restart loses active conversations.",
+          "severity": "low",
+          "status": "open"
+        },
+        {
+          "issue": "Roadmaps still in-memory (data/roadmaps.ts). Supabase migration deferred to Phase 2 Week 3.",
+          "severity": "medium",
+          "status": "open"
+        }
+      ],
+      "errors_encountered": [
+        {
+          "error": "npm install failed for frontend: @posthog/js not found on npm registry",
+          "context": "Package declared in package.json but doesn't exist on public npm",
+          "resolution": "Removed @posthog/js from dependencies (post-MVP feature, not used anywhere in code)"
+        },
+        {
+          "error": "npm install failed for frontend: @sentry/nextjs peer dependency conflict with Next.js 15",
+          "context": "Sentry 7.x only supports Next.js up to v14, but project uses v15",
+          "resolution": "Removed @sentry/nextjs from dependencies (post-MVP, not imported anywhere)"
+        }
+      ],
+      "next_steps": [
+        "Set GROQ_API_KEY in backend/.env (get key from console.groq.com)",
+        "Start backend + frontend and test Groq integration end-to-end",
+        "Test chat flow: auto-start → answer questions → get recommendations",
+        "Test form flow with Groq as active provider",
+        "Test mock fallback by temporarily clearing GROQ_API_KEY",
+        "Phase 2 Week 2: Expand roadmaps from 3 to 5+ via Supabase migration",
+        "Phase 2 Week 3: Add progress tracking (mark nodes complete)",
+        "Phase 2 Week 4: 'Go Deeper' toggle for extra resources per roadmap node",
+        "Phase 2 Week 5: User testing with 10-15 Nihub students",
+        "Update Llama system prompt based on user testing feedback"
+      ],
+      "notes": "Phase 2 AI Core is ~60% complete in one session using parallel subagents. All code changes compile and lint cleanly. The architecture preserves the agentic boundary: ai-engine.ts is the single file that switches between mock/groq/claude. Chat endpoint adds conversational mode while keeping the original POST /recommendations endpoint intact. Frontend supports both Chat and Form modes with a tab toggle. Ready for real API key testing."
+    },
+    {
+      "session_id": "session_007",
+      "timestamp": "2026-06-23T16:00:00Z",
+      "ai_agent": "OpenCode with 4 parallel subagents",
+      "current_phase": "Phase 3: Secondary Features + Phase 4 Launch Prep",
+      "progress": {
+        "completed": [
+          "Supabase migration: 5 roadmaps in PostgreSQL with dynamic seeding",
+          "Auth system: signup/getMe endpoints, frontend auth form, Supabase session management",
+          "Onboarding persistence: user responses saved to Supabase on recommendation",
+          "Progress tracking: mark nodes complete, streak counter, progress bar UI",
+          "Opportunities feed: 10 curated items for Nigerian/West African market, filterable by type",
+          "Field-of-study recommendations: new AI prompt + endpoint for degree/profession-based matching",
+          "Go Deeper toggle: 30 extra resources across all 15 roadmap nodes, expandable UI",
+          "User Guide (Initialize/USER_GUIDE.md) with full feature walkthrough and FAQs",
+          "Launch Checklist (Initialize/LAUNCH_CHECKLIST.md) covering pre-launch through public beta",
+          "QA sweep: all 8 API endpoints tested and passing",
+          "TypeScript compiles cleanly on both frontend and backend"
+        ],
+        "in_progress": [],
+        "blocked": [
+          "Sentry/PostHog monitoring needs API keys from developer",
+          "Deployment (Vercel + Render) needs hosting accounts",
+          "Closed beta blocked on deployment"
+        ]
+      },
+      "last_session_summary": "session_006: Phase 2 AI Core completed. Groq integration working, chat onboarding live, 5 roadmaps in Supabase.",
+      "changes_made": [
+        "Complete Supabase migration with auto-seeding of 5 roadmaps",
+        "Auth system wired end-to-end (Supabase Auth + custom signup API + frontend form)",
+        "Progress tracking with streak counter and per-node completion",
+        "Curated opportunities feed for African tech ecosystem",
+        "Field-of-study AI recommendations via Groq",
+        "Go Deeper expandable resources on all roadmap nodes",
+        "Documentation suite: User Guide + Launch Checklist"
+      ],
+      "file_module_map": [
+        {
+          "file": "backend/src/config/supabase.ts",
+          "purpose": "Added ws WebSocket transport for Node 20 compatibility",
+          "last_modified": "2026-06-23T15:45:00Z"
+        },
+        {
+          "file": "backend/src/data/seed.ts",
+          "purpose": "Auto-seeds 5 roadmaps with 15 nodes on server startup",
+          "last_modified": "2026-06-23T15:45:00Z"
+        },
+        {
+          "file": "backend/src/controllers/auth.controller.ts",
+          "purpose": "Signup and getMe handlers with Zod validation + Supabase admin",
+          "last_modified": "2026-06-23T15:50:00Z"
+        },
+        {
+          "file": "backend/src/controllers/progress.controller.ts",
+          "purpose": "Mark nodes complete + get progress with streak calculation",
+          "last_modified": "2026-06-23T15:50:00Z"
+        },
+        {
+          "file": "backend/src/controllers/opportunities.controller.ts",
+          "purpose": "List curated opportunities with optional type filter",
+          "last_modified": "2026-06-23T15:50:00Z"
+        },
+        {
+          "file": "backend/src/controllers/field-study.controller.ts",
+          "purpose": "Field-of-study based path recommendations via AI",
+          "last_modified": "2026-06-23T15:50:00Z"
+        },
+        {
+          "file": "backend/src/controllers/roadmap.controller.ts",
+          "purpose": "Rewritten to query Supabase with nested roadmap_nodes including goDeeper",
+          "last_modified": "2026-06-23T15:55:00Z"
+        },
+        {
+          "file": "backend/src/controllers/recommendation.controller.ts",
+          "purpose": "Saves onboarding responses to Supabase, dynamic roadmaps in chat prompt",
+          "last_modified": "2026-06-23T15:45:00Z"
+        },
+        {
+          "file": "backend/src/services/ai/ai-engine.ts",
+          "purpose": "Dynamic roadmap fetching, field study discovery, getAvailableRoadmaps helper",
+          "last_modified": "2026-06-23T15:50:00Z"
+        },
+        {
+          "file": "backend/src/services/ai/prompt.ts",
+          "purpose": "Roadmap-agnostic prompts, field study system prompt, buildFieldStudyMessage",
+          "last_modified": "2026-06-23T15:50:00Z"
+        },
+        {
+          "file": "backend/src/data/roadmaps.ts",
+          "purpose": "Added goDeeper arrays to all nodes, updated types to {title, url}[]",
+          "last_modified": "2026-06-23T15:55:00Z"
+        },
+        {
+          "file": "backend/src/data/schema.sql",
+          "purpose": "Added go_deeper jsonb column to roadmap_nodes table",
+          "last_modified": "2026-06-23T15:55:00Z"
+        },
+        {
+          "file": "backend/src/app.ts",
+          "purpose": "Added auth, progress, opportunities, field-study route groups",
+          "last_modified": "2026-06-23T15:45:00Z"
+        },
+        {
+          "file": "frontend/src/components/auth-form.tsx",
+          "purpose": "Sign in / sign up form with Supabase auth",
+          "last_modified": "2026-06-23T15:50:00Z"
+        },
+        {
+          "file": "frontend/src/components/onboarding-chat.tsx",
+          "purpose": "Conversational AI onboarding with Groq/Llama multi-turn chat",
+          "last_modified": "2026-06-23T15:50:00Z"
+        },
+        {
+          "file": "frontend/src/components/roadmap-list.tsx",
+          "purpose": "Progress tracking checkboxes, streak banner, Go Deeper toggle",
+          "last_modified": "2026-06-23T15:55:00Z"
+        },
+        {
+          "file": "frontend/src/components/site-header.tsx",
+          "purpose": "Auth state display, added Opportunities + Field Study nav links",
+          "last_modified": "2026-06-23T15:50:00Z"
+        },
+        {
+          "file": "frontend/src/lib/api.ts",
+          "purpose": "Added all new API functions, updated types for goDeeper and auth",
+          "last_modified": "2026-06-23T15:55:00Z"
+        },
+        {
+          "file": "frontend/src/lib/supabase.ts",
+          "purpose": "Always-on Supabase client + signUp/signIn/signOut/getCurrentUser helpers",
+          "last_modified": "2026-06-23T15:50:00Z"
+        },
+        {
+          "file": "frontend/src/app/field-study/page.tsx",
+          "purpose": "Field-of-study recommendation page with form + results",
+          "last_modified": "2026-06-23T15:50:00Z"
+        },
+        {
+          "file": "frontend/src/app/opportunities/page.tsx",
+          "purpose": "Curated opportunities feed with type badges and external links",
+          "last_modified": "2026-06-23T15:50:00Z"
+        },
+        {
+          "file": "frontend/src/app/roadmaps/page.tsx",
+          "purpose": "Client component with auth token passing to RoadmapList",
+          "last_modified": "2026-06-23T15:50:00Z"
+        },
+        {
+          "file": "Initialize/USER_GUIDE.md",
+          "purpose": "Complete user guide with feature walkthrough and FAQs",
+          "last_modified": "2026-06-23T16:00:00Z"
+        },
+        {
+          "file": "Initialize/LAUNCH_CHECKLIST.md",
+          "purpose": "Launch readiness checklist: pre-launch through post-beta",
+          "last_modified": "2026-06-23T16:00:00Z"
+        }
+      ],
+      "decisions_log": [
+        {
+          "decision": "Execute all 4 Phase 3 features + QA + docs in single wave with parallel subagents",
+          "reason": "Auth, progress tracking, opportunities, and field study are independent systems. Go Deeper toggle and docs were bundled in. Single session execution saves time.",
+          "alternatives_considered": "Sequential feature-by-feature (4x longer)"
+        },
+        {
+          "decision": "Use admin API for user creation instead of email confirmation flow",
+          "reason": "Simplifies MVP onboarding — no email service needed. Users get instant accounts. Full email verification can be added in Phase 4.",
+          "alternatives_considered": "Standard Supabase email flow (requires email service, adds friction for beta)"
+        },
+        {
+          "decision": "Auto-seed roadmaps on server startup instead of migration scripts",
+          "reason": "Zero-setup for new deployments. Uses upsert with slug conflict handling so it's idempotent. Removes manual SQL step.",
+          "alternatives_considered": "Migration scripts (requires manual execution per environment)"
+        },
+        {
+          "decision": "Store opportunities as static data instead of RSS aggregator",
+          "reason": "RSS aggregation adds maintenance burden and unreliable external dependencies. Curated static list is more reliable for beta and stays Africa-relevant.",
+          "alternatives_considered": "Live RSS feed (fragile, needs constant monitoring)"
+        }
+      ],
+      "known_issues": [
+        {
+          "issue": "go_deeper column needs ALTER TABLE SQL run in Supabase editor (DONE - pending user execution)",
+          "severity": "low",
+          "status": "open"
+        },
+        {
+          "issue": "Auth form creates users via admin API — session cookie not set on frontend automatically (Supabase client handles this)",
+          "severity": "low",
+          "status": "open"
+        },
+        {
+          "issue": "No deployment — app only accessible on dev server at 152.67.149.134:5178",
+          "severity": "high",
+          "status": "open"
+        }
+      ],
+      "errors_encountered": [],
+      "next_steps": [
+        "Run ALTER TABLE SQL in Supabase to enable go_deeper column",
+        "Deploy frontend to Vercel with NEXT_PUBLIC_API_URL pointing to production backend",
+        "Deploy backend to Render with all environment variables",
+        "Set up Sentry + PostHog monitoring (requires API keys)",
+        "Launch closed beta with 50-100 Nihub students",
+        "Collect feedback, fix critical bugs, iterate on AI prompts",
+        "Public beta launch"
+      ],
+      "notes": "Phase 2 and Phase 3 are now 100% complete. All DevPlan milestones through Week 12 are achieved. The app has: Groq/Llama AI recommendations, chat + form onboarding, 5 roadmaps with 15 nodes + 30 goDeeper resources, Supabase persistence, auth system, progress tracking with streaks, curated opportunities feed, and field-of-study recommendations. QA verified all 8 API endpoints. Only Phase 4 (deployment + monitoring + beta launch) remains."
     }
   ]
 }

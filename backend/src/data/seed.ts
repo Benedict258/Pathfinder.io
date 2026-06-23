@@ -1,4 +1,6 @@
-export type RoadmapNode = {
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+type SeedNode = {
   id: string;
   title: string;
   explanation: string;
@@ -7,15 +9,15 @@ export type RoadmapNode = {
   goDeeper?: { title: string; url: string }[];
 };
 
-export type Roadmap = {
+type SeedRoadmap = {
   slug: string;
   title: string;
   description: string;
   level: "beginner" | "intermediate";
-  nodes: RoadmapNode[];
+  nodes: SeedNode[];
 };
 
-export const roadmaps: Roadmap[] = [
+const seedRoadmapsData: SeedRoadmap[] = [
   {
     slug: "frontend-development",
     title: "Frontend Development",
@@ -237,3 +239,59 @@ export const roadmaps: Roadmap[] = [
     ]
   }
 ];
+
+export async function seedRoadmaps(supabase: SupabaseClient) {
+  for (const roadmap of seedRoadmapsData) {
+    console.log(`Seeding roadmap: ${roadmap.slug}`);
+
+    const { data: existing, error: upsertError } = await supabase
+      .from("roadmaps")
+      .upsert(
+        {
+          slug: roadmap.slug,
+          title: roadmap.title,
+          description: roadmap.description,
+          level: roadmap.level
+        },
+        { onConflict: "slug" }
+      )
+      .select("id")
+      .single();
+
+    if (upsertError || !existing) {
+      console.error(`Failed to upsert roadmap ${roadmap.slug}:`, upsertError);
+      continue;
+    }
+
+    const roadmapId = existing.id;
+
+    const { error: deleteError } = await supabase
+      .from("roadmap_nodes")
+      .delete()
+      .eq("roadmap_id", roadmapId);
+
+    if (deleteError) {
+      console.error(`Failed to delete nodes for ${roadmap.slug}:`, deleteError);
+    }
+
+    const nodes = roadmap.nodes.map((node, index) => ({
+      roadmap_id: roadmapId,
+      title: node.title,
+      explanation: node.explanation,
+      resource_title: node.resourceTitle,
+      resource_url: node.resourceUrl,
+      go_deeper: node.goDeeper || [],
+      position: index + 1
+    }));
+
+    const { error: insertError } = await supabase
+      .from("roadmap_nodes")
+      .insert(nodes);
+
+    if (insertError) {
+      console.error(`Failed to insert nodes for ${roadmap.slug}:`, insertError);
+    } else {
+      console.log(`  Seeded ${nodes.length} nodes`);
+    }
+  }
+}

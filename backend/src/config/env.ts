@@ -15,9 +15,10 @@ const envSchema = z.object({
   // Redis (Caching & Sessions)
   REDIS_URL: z.string().default("redis://localhost:6379"),
 
-  // AI Provider (Phase 1: "mock", Phase 2+: "claude")
-  AI_PROVIDER: z.enum(["mock", "openai", "claude", "anthropic"]).default("mock"),
-  CLAUDE_API_KEY: z.string().optional(),
+  // AI Provider
+  AI_PROVIDER: z.enum(["mock", "groq", "claude"]).default("groq"),
+  GROQ_API_KEY: z.string().optional(),
+  AI_MODEL: z.string().default("llama-3.3-70b-versatile"),
 
   // CMS (Choose: Sanity or Notion)
   SANITY_PROJECT_ID: z.string().optional(),
