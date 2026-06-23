@@ -12,6 +12,12 @@ function sanitizePromptInput(text: string): string {
     .slice(0, 1000);
 }
 
+function parseGroqJson(raw: string): unknown {
+  let cleaned = raw.trim();
+  cleaned = cleaned.replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/i, "");
+  return JSON.parse(cleaned);
+}
+
 export type AiPathDiscoveryResult = {
   recommendations: PathRecommendation[];
   engine: "mock" | "groq" | "claude";
@@ -64,7 +70,7 @@ async function callGroq(input: OnboardingInput): Promise<PathRecommendation[]> {
     const raw = completion.choices[0]?.message?.content;
     if (!raw) throw new Error("Empty response from Groq");
 
-    const parsed = JSON.parse(raw.trim());
+    const parsed = parseGroqJson(raw);
     const validated = RecommendationResponseSchema.parse(parsed);
 
     return validated.recommendations;
@@ -147,7 +153,7 @@ export async function runFieldStudyDiscovery(field: string): Promise<AiPathDisco
       const raw = completion.choices[0]?.message?.content;
       if (!raw) throw new Error("Empty response from Groq");
 
-      const parsed = JSON.parse(raw.trim());
+      const parsed = parseGroqJson(raw);
       const validated = RecommendationResponseSchema.parse(parsed);
       return { recommendations: validated.recommendations, engine: "groq" };
     } catch (error) {
@@ -236,7 +242,7 @@ export async function runReskillingDiscovery(input: { currentRole: string; curre
       const raw = completion.choices[0]?.message?.content;
       if (!raw) throw new Error("Empty response from Groq");
 
-      const parsed = JSON.parse(raw.trim());
+      const parsed = parseGroqJson(raw);
       const validated = RecommendationResponseSchema.parse(parsed);
       return { recommendations: validated.recommendations, engine: "groq" };
     } catch (error) {
