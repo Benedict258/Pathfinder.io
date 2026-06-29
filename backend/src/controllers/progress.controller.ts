@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { z } from "zod";
 import { supabaseAdmin } from "../config/supabase.js";
+import { triggerStreakEmail } from "../services/email/triggers.js";
 
 const markCompleteSchema = z.object({
   node_id: z.string(),
@@ -74,6 +75,17 @@ export async function markNodeComplete(req: Request, res: Response) {
         return d.getTime() === today.getTime();
       });
       if (hasToday && streak === 0) streak = 1;
+    }
+
+    const streakMilestones = [3, 7, 14];
+    if (streakMilestones.includes(streak) && user.email) {
+      triggerStreakEmail(
+        user.id,
+        user.email,
+        undefined,
+        streak,
+        progress?.length || 0,
+      ).catch(() => {});
     }
 
     res.json({ success: true, streak });

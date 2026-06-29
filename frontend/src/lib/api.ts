@@ -98,6 +98,7 @@ export type Opportunity = {
   url: string;
   deadline?: string;
   location?: string;
+  source?: string;
 };
 
 export function listOpportunities(type?: string) {

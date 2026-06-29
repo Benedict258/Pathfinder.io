@@ -6,6 +6,7 @@ import { supabaseAdmin, hasSupabaseConfig } from "../config/supabase.js";
 import { recommendPaths } from "../services/recommendations/recommendation.service.js";
 import { RecommendationResponseSchema } from "../services/ai/prompt.js";
 import { runPathDiscovery } from "../services/ai/ai-engine.js";
+import { triggerPathRecommendedEmail } from "../services/email/triggers.js";
 
 const onboardingSchema = z.object({
   background: z.string().min(2),
@@ -34,6 +35,16 @@ export async function createRecommendation(req: Request, res: Response) {
           time_commitment: input.timeCommitment,
           recommended_paths: result.recommendations || [],
         });
+
+        const topRec = result.recommendations?.[0];
+        if (topRec && user.email) {
+          triggerPathRecommendedEmail(
+            user.id,
+            user.email,
+            undefined,
+            topRec.title,
+          ).catch(() => {});
+        }
       }
     } catch {
       // non-blocking: silently ignore onboarding save failures

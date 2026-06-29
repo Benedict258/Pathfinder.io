@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { z } from "zod";
 import { supabaseAdmin, hasSupabaseConfig } from "../config/supabase.js";
+import { triggerWelcomeEmail } from "../services/email/triggers.js";
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -32,6 +33,10 @@ export async function signup(req: Request, res: Response) {
       id: userData.user.id,
       full_name: input.full_name || null,
     });
+
+    triggerWelcomeEmail(userData.user.id, input.email, input.full_name).catch(
+      () => {},
+    );
 
     res.status(201).json({
       user: { id: userData.user.id, email: userData.user.email },

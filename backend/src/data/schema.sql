@@ -48,3 +48,11 @@ create table if not exists public.user_progress (
   completed_at timestamptz not null default now(),
   unique (user_id, roadmap_node_id)
 );
+
+create table if not exists public.email_log (
+  id uuid primary key default gen_random_uuid(),
+  recipient text not null,
+  subject text not null,
+  template text not null,
+  sent_at timestamptz not null default now()
+);
